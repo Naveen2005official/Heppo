@@ -15,22 +15,24 @@ namespace DatingAppAPI.Controllers
         [HttpPost("Register")]
         public async Task<ActionResult<UserDTO>> Register([FromBody] RegisterDTO dto)
         {
-            var hmac = new HMACSHA512();
-            var user = new AppUser
-            {
-                UserName = dto.UserName,
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password)),
-                PasswordSalt = hmac.Key
-            };
-            db.Users.Add(user);
-            await db.SaveChangesAsync();
-            return Ok(
-                new UserDTO 
-                { 
-                    UserName = dto.UserName, 
-                    Token = ts.CreateToken(user)
-                }
-            );
+            if (await UserExists(dto.UserName)) return BadRequest("Username is taken");
+            return Ok();
+            //var hmac = new HMACSHA512();
+            //var user = new AppUser
+            //{
+            //    UserName = dto.UserName,
+            //    PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password)),
+            //    PasswordSalt = hmac.Key
+            //};
+            //db.Users.Add(user);
+            //await db.SaveChangesAsync();
+            //return Ok(
+            //    new UserDTO 
+            //    { 
+            //        UserName = dto.UserName, 
+            //        Token = ts.CreateToken(user)
+            //    }
+            //);
         }
 
         [HttpPost("Login")]
@@ -55,6 +57,10 @@ namespace DatingAppAPI.Controllers
                     Token = ts.CreateToken(user)
                 }
             );
+        }
+        private async Task<bool> UserExists(string username)
+        {
+            return await db.Users.AnyAsync(x => x.UserName.ToLower() == username.ToLower());
         }
     }
 }

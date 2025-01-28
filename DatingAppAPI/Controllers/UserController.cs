@@ -11,25 +11,24 @@ using Microsoft.EntityFrameworkCore;
 namespace DatingAppAPI.Controllers
 {
     [Authorize]
-    public class UserController(IUserRepository userRepository, IMapper mapper) : BaseApiController
+    public class UserController(IUserRepository userRepository) : BaseApiController
     {
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers()
         {
-            var users = await userRepository.GetAllAsync();
-            var usersToReturn = mapper.Map<IEnumerable<MemberDTO>>(users);
-            return Ok(usersToReturn);
+            var users = await userRepository.GetMembersAsync();
+            return Ok(users);
         }
 
         [HttpGet("{username}")]
         public async Task<ActionResult<MemberDTO>> GetUser(string username)
         {
-            var user = await userRepository.GetUserByUsernameAsync(username);
+            var user = await userRepository.GetMemberAsync(username);
             if (user == null)
             {
                 return NotFound();
             }
-            return mapper.Map<MemberDTO>(user);
+            return Ok(user);
         }
     }
 }

@@ -1,10 +1,13 @@
-﻿using DatingAppAPI.Entities;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using DatingAppAPI.DTOs;
+using DatingAppAPI.Entities;
 using DatingAppAPI.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppAPI.Data
 {
-    public class UserRepository(AppDbContext db) : IUserRepository
+    public class UserRepository(AppDbContext db, IMapper mapper) : IUserRepository
     {
         public async Task<IEnumerable<AppUser>> GetAllAsync()
         {
@@ -14,6 +17,21 @@ namespace DatingAppAPI.Data
         public async Task<AppUser?> GetByIdAsync(int id)
         {
             return await db.Users.FindAsync(id);
+        }
+
+        public async Task<IEnumerable<MemberDTO>> GetMembersAsync()
+        {
+            return await db.Users
+                .ProjectTo<MemberDTO>(mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        public async Task<MemberDTO?> GetMemberAsync(string username)
+        {
+            return await db.Users
+                .Where(x => x.UserName == username)
+                .ProjectTo<MemberDTO>(mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
         }
 
         public async Task<AppUser?> GetUserByUsernameAsync(string username)

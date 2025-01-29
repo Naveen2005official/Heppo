@@ -15,7 +15,7 @@ namespace DatingAppAPI.Controllers
         [HttpPost("Register")]
         public async Task<ActionResult<UserDTO>> Register([FromBody] RegisterDTO dto)
         {
-            if (await UserExists(dto.UserName)) return BadRequest("Username is taken");
+            if (await UserExists(dto.Username)) return BadRequest("Username is taken");
             return Ok();
             //var hmac = new HMACSHA512();
             //var user = new AppUser

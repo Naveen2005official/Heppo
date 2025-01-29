@@ -7,11 +7,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DatingAppAPI.Controllers
 {
     [Authorize]
-    public class UserController(IUserRepository userRepository) : BaseApiController
+    public class UserController(IUserRepository userRepository, IMapper mapper) : BaseApiController
     {
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers()
@@ -30,5 +31,24 @@ namespace DatingAppAPI.Controllers
             }
             return Ok(user);
         }
+
+        [HttpPut]
+        public async Task<ActionResult> UpdateUser(MemberUpdateDTO memberUpdateDto)
+        {
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (username == null) return BadRequest("No username found in token");
+
+            var user = await userRepository.GetUserByUsernameAsync(username);
+
+            if (user == null) return BadRequest("Could not find user");
+
+            mapper.Map(memberUpdateDto, user);
+
+            if (await userRepository.SaveAllAsync()) return NoContent();
+
+            return BadRequest("Failed to update the user");
+        }
+
     }
 }

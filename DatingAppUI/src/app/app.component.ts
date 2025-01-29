@@ -6,16 +6,17 @@ import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { AccountService } from './services/account.service';
 import { HomeComponent } from "./home/home.component";
+import { NgxSpinner, NgxSpinnerModule } from 'ngx-spinner';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavComponent],
+  imports: [RouterOutlet, NavComponent,NgxSpinnerModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
-  private accountService = inject(AccountService)
+  private accountService = inject(AccountService);
 
   ngOnInit(): void {
     this.setCurrentUser();

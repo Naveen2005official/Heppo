@@ -20,7 +20,7 @@
         @if (accountService.currentUser()) {
             <div dropdown class="dropdown">
                 <a dropdownToggle class="dropdown-toggle text-light text-decoration-none">
-                    Welcome {{accountService.currentUser()?.userName | titlecase}}
+                    Welcome {{accountService.currentUser()?.username | titlecase}}
                 </a>
                 <div *dropdownMenu class="dropdown-menu">
                     <a class="dropdown-item">Edit profile</a>

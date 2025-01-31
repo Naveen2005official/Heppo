@@ -1,7 +1,7 @@
 import { Component, EventEmitter, inject, Input, Output, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountService } from '../services/account.service';
-import { Toast, ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-register',

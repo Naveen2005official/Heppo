@@ -1,7 +1,9 @@
-﻿using DatingAppAPI.Data;
+﻿using AutoMapper;
+using DatingAppAPI.Data;
 using DatingAppAPI.DTOs;
 using DatingAppAPI.Entities;
 using DatingAppAPI.Interfaces;
+using DatingAppAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,29 +12,29 @@ using System.Text;
 
 namespace DatingAppAPI.Controllers
 {
-    public class AccountController(AppDbContext db, ITokenService ts) : BaseApiController
+    public class AccountController(AppDbContext db, ITokenService ts, IMapper mapper) : BaseApiController
     {
         [HttpPost("Register")]
         public async Task<ActionResult<UserDTO>> Register([FromBody] RegisterDTO dto)
         {
             if (await UserExists(dto.Username)) return BadRequest("Username is taken");
-            return Ok();
-            //var hmac = new HMACSHA512();
-            //var user = new AppUser
-            //{
-            //    UserName = dto.UserName,
-            //    PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password)),
-            //    PasswordSalt = hmac.Key
-            //};
-            //db.Users.Add(user);
-            //await db.SaveChangesAsync();
-            //return Ok(
-            //    new UserDTO 
-            //    { 
-            //        UserName = dto.UserName, 
-            //        Token = ts.CreateToken(user)
-            //    }
-            //);
+            using var hmac = new HMACSHA512();
+
+            var user = mapper.Map<AppUser>(dto);
+
+            user.UserName = dto.Username.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password));
+            user.PasswordSalt = hmac.Key;
+
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+
+            return new UserDTO
+            {
+                Username = user.UserName,
+                Token = ts.CreateToken(user),
+                KnownAs = user.KnownAs
+            };
         }
 
         [HttpPost("Login")]
@@ -54,6 +56,7 @@ namespace DatingAppAPI.Controllers
                 new UserDTO
                 {
                     Username = dto.Username,
+                    KnownAs = user.KnownAs,
                     Token = ts.CreateToken(user),
                     PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
                 }

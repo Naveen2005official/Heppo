@@ -37,11 +37,7 @@ namespace DatingAppAPI.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateUser(MemberUpdateDTO memberUpdateDto)
         {
-            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (username == null) return BadRequest("No username found in token");
-
-            var user = await userRepository.GetUserByUsernameAsync(username);
+            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
 
             if (user == null) return BadRequest("Could not find user");
 

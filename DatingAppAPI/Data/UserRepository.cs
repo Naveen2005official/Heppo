@@ -23,7 +23,7 @@ namespace DatingAppAPI.Data
         public async Task<PagedList<MemberDTO>> GetMembersAsync(UserParams userParams)
         {
             var query = db.Users.AsQueryable();
-            query = query.Where(x => x.UserName != userParams.CurrentUserName);
+            query = query.Where(x => x.UserName != userParams.CurrentUsername);
             if(userParams.Gender != null)
             {
                 query = query.Where(x => x.Gender ==  userParams.Gender);

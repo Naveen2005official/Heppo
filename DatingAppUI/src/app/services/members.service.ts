@@ -7,6 +7,7 @@ import { Photo } from '../models/photo';
 import { PaginationResult } from '../models/pagination';
 import { UserParams } from '../models/user-params';
 import { AccountService } from './account.service';
+import { setPaginatedResponse, setPaginationHeaders } from './pagination-helper.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,6 @@ export class MembersService {
   private http = inject(HttpClient)
   private accountService = inject(AccountService)
   baseUrl = environment.apiUrl
-  // members = signal<Member[]>([]);
   paginatedResult = signal<PaginationResult<Member[]> | null>(null);
   memberCache = new Map();
   user = this.accountService.currentUser();
@@ -29,8 +29,8 @@ export class MembersService {
   getMembers()
   {
     const response = this.memberCache.get(Object.values(this.userParams()).join('-'));
-    if(response) return this.setPaginationResponse(response);
-    let params = this.setPaginationHeaders(this.userParams().pageNumber, this.userParams().pageSize);
+    if(response) return setPaginatedResponse(response, this.paginatedResult);
+    let params = setPaginationHeaders(this.userParams().pageNumber, this.userParams().pageSize);
 
     params = params.append('minAge', this.userParams().minAge);
     params = params.append('maxAge', this.userParams().maxAge);
@@ -38,30 +38,12 @@ export class MembersService {
     params = params.append('orderBy', this.userParams().orderBy);
     return this.http.get<Member[]>(this.baseUrl + 'User', {observe : 'response', params}).subscribe({
       next: response => {
-        this.setPaginationResponse(response);
+        setPaginatedResponse(response, this.paginatedResult);
         this.memberCache.set(Object.values(this.userParams()).join('-'), response);
       }
     })
   }
 
-  private setPaginationResponse(response: HttpResponse<Member[]>)
-  {
-    this.paginatedResult.set({
-      items: response.body as Member[],
-      pagination: JSON.parse(response.headers.get('Pagination')!)
-    })
-  }
-
-  private setPaginationHeaders(pageNumber: number, pageSize: number)
-  {
-    let params = new HttpParams();
-    if(pageNumber && pageSize)
-    {
-      params = params.append('pageNumber', pageNumber);
-      params = params.append('pageSize', pageSize);
-    }
-    return params;
-  }
   getMember(username : string)
   {
     const member: Member = [...this.memberCache.values()]

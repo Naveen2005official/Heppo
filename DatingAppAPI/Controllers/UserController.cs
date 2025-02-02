@@ -20,7 +20,7 @@ namespace DatingAppAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers([FromQuery] UserParams userParams)
         {
-            userParams.CurrentUserName = User.GetUsername();
+            userParams.CurrentUsername = User.GetUsername();
             var users = await userRepository.GetMembersAsync(userParams);
             Response.AddPaginationHead(users);
             return Ok(users);

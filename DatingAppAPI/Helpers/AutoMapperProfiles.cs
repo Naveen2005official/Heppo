@@ -15,7 +15,7 @@ namespace DatingAppAPI.Helpers
             CreateMap<Photo, PhotoDto>();
             CreateMap<MemberUpdateDTO, AppUser>();
             CreateMap<RegisterDTO, AppUser>();
-            CreateMap<string, DateOnly>().ConvertUsing(s => DateOnly.Parse(s));
+            CreateMap<string, DateOnly>().ConvertUsing(s =>  DateOnly.Parse(s));
         }
     }
 }

@@ -3,6 +3,7 @@ using DatingAppAPI.Data;
 using DatingAppAPI.DTOs;
 using DatingAppAPI.Entities;
 using DatingAppAPI.Extensions;
+using DatingAppAPI.Helpers;
 using DatingAppAPI.Interfaces;
 using DatingAppAPI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -17,9 +18,11 @@ namespace DatingAppAPI.Controllers
     public class UserController(IUserRepository userRepository, IMapper mapper, IPhotoInterface photoInterface) : BaseApiController
     {
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<MemberDTO>>> GetUsers([FromQuery] UserParams userParams)
         {
-            var users = await userRepository.GetMembersAsync();
+            userParams.CurrentUserName = User.GetUsername();
+            var users = await userRepository.GetMembersAsync(userParams);
+            Response.AddPaginationHead(users);
             return Ok(users);
         }
 

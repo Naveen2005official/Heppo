@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DatingAppAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial3 : Migration
+    public partial class Initial3 : Migration  
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

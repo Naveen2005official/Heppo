@@ -1,22 +1,31 @@
 ﻿using DatingAppAPI.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppAPI.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext(DbContextOptions options) : IdentityDbContext<AppUser, AppRole, int, IdentityUserClaim<int>, AppUserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
-        {
-
-        }
-
-        public DbSet<AppUser> Users { get; set; }
         public DbSet<UserLike> Likes { get; set; }
         public DbSet<Message> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<AppUser>()
+                .HasMany(u => u.UserRoles)
+                .WithOne(u => u.Users)
+                .HasForeignKey(u => u.UserId)
+                .IsRequired();
+
+            builder.Entity<AppRole>()
+                .HasMany(u => u.UserRoles)
+                .WithOne(u => u.Roles)
+                .HasForeignKey(u => u.RoleId)
+                .IsRequired();
+
             builder.Entity<UserLike>()
                 .HasKey(k => new { k.SourceUserId, k.TargetUserId });
 
@@ -37,10 +46,10 @@ namespace DatingAppAPI.Data
             .WithMany(x => x.MessagesReceived)
             .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<Message>()
-                .HasOne(x => x.Sender)
-                .WithMany(x => x.MessagesSent)
-                .OnDelete(DeleteBehavior.Restrict);
+        builder.Entity<Message>()
+            .HasOne(x => x.Sender)
+            .WithMany(x => x.MessagesSent)
+            .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
